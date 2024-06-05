@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+            }
+
+            .container {
+                max-width: 800px;
+                margin: 0 auto;
+                padding: 20px;
+            }
+
+            h1 {
+                text-align: center;
+            }
+
+            #add-review-form {
+                margin-bottom: 20px;
+                max-width: 500px;
+            }
+
+            label {
+                display: block;
+                margin-bottom: 5px;
+            }
+
+            input,
+            textarea {
+                width: 100%;
+                padding: 10px;
+                border: 1px solid #ccc;
+                box-sizing: border-box;
+                max-width: 400px;
+                margin-bottom: 20px;
+                
+            }
+
+            button {
+                padding: 10px 20px;
+                background-color: #007bff;
+                color: white;
+                border: none;
+                cursor: pointer;
+            }
+
+            #reviews-list {
+                list-style: none;
+                padding: 0;
+                max-width: 400px;
+            }
+
+            #reviews-list li {
+                margin-bottom: 10px;
+                border: 1px solid #ccc;
+                padding: 10px;
+            }
+            li {
+                position: relative;
+            }
+
+            .product-name {
+                font-weight: bold;
+            }
+
+            .review-text {
+                margin-top: 5px;
+            }
+
+            .delete-button {
+                position: absolute;
+                right: 0;
+                bottom: 0;
+                padding: 5px 10px;
+                background-color: #dc3545;
+                color: white;
+                border: none;
+                cursor: pointer;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Отзывы о продуктах</h1>
+    
+            <div id="add-review-form">
+                <h2>Добавить отзыв</h2>
+                <form>
+                    <label for="product-name">Название продукта:</label>
+                    <input type="text" id="product-name" name="product-name" required/>
+    
+                    <label for="review-text">Отзыв:</label>
+                    <textarea id="review-text" name="review-text" required></textarea>
+    
+                    <button id="submit-btn" type="submit">Добавить отзыв</button>
+                </form>
+            </div>
+    
+            <div id="reviews-list">
+                <h2>Список отзывов</h2>
+            </div>
+        </div>
+
+        <script>
+            document.querySelector('#submit-btn').addEventListener('click', () => {
+                event.preventDefault();
+                const productName = document.querySelector('#product-name').value;
+                const reviewText = document.querySelector('#review-text').value;
+
+                // Проверяем, что оба поля заполнены 
+                if (productName && reviewText ) {
+                    let savedReviews = JSON.parse(localStorage.getItem('savedReviews')) || [];
+                    savedReviews.unshift({ productName: productName, reviewText: reviewText });
+                    localStorage.setItem('savedReviews', JSON.stringify(savedReviews));
+                    displayReviews(savedReviews);
+                } else {
+                    alert('Заполните оба поля!');
+                }
+            });
+
+            function displayReviews(savedReviews) {
+                const reviewsList = document.querySelector('#reviews-list');
+                reviewsList.innerHTML = '';
+                if (savedReviews.length === 0) {
+                    const noReviewMessage = document.createElement('p');
+                    noReviewMessage.textContent = 'Отзывов пока нет!';
+                    reviewsList.appendChild(noReviewMessage);
+                } else {
+                    savedReviews.forEach((review, index) => {
+                        const listItem = document.createElement('li');
+                        listItem.dataset.index = index;
+                        listItem.innerHTML = `
+                            <h3 class="product-name">${review.productName}</h3>
+                            <p class="review-text">${review.reviewText}</p>
+                            <button class="delete-button">Удалить</button>
+                        `;
+                        reviewsList.appendChild(listItem);
+                    });
+                }
+            }
+
+            // Функция для удаления отзыва
+            document.addEventListener('click', (event) => {
+                if (event.target.classList.contains('delete-button')) {
+                    const index = event.target.parentElement.dataset.index;
+                    deleteReview(index, event);
+                }
+            });
+            function deleteReview(index) {
+                let savedReviews = JSON.parse(localStorage.getItem('savedReviews')) || [];
+                savedReviews.splice(index, 1);
+                localStorage.setItem('savedReviews', JSON.stringify(savedReviews));
+                displayReviews(savedReviews);
+            }
+
+            document.addEventListener('DOMContentLoaded', () => {
+                const savedReviews = JSON.parse(localStorage.getItem('savedReviews')) || [];
+                displayReviews(savedReviews);
+            });
+        </script>
+    </body>
+</html>
